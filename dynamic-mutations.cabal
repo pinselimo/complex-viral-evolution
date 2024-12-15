@@ -1,0 +1,108 @@
+cabal-version:      2.4
+name:               dynamic-mutations
+version:            0.1.0.0
+-- synopsis:
+-- description:
+license:            NONE
+author:             Simon Plakolb
+maintainer:         s.plakolb@gmail.com
+-- copyright:
+build-type:         Simple
+-- extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+common options
+    ghc-prof-options: -fprof-late
+                      -prof
+                      -fno-prof-count-entries
+                      "-with-rtsopts=-pa -s -l -hc -i1"
+    ghc-options:      -Wall
+                      -O2
+                      -fexcess-precision
+                      -funbox-small-strict-fields
+                      -fllvm
+                      -mavx2
+                      -threaded
+                      -rtsopts
+common language
+    default-language: Haskell2010
+
+common dependencies
+    build-depends: base >=4.13.0.0
+                 , random-fu
+                 , mwc-random
+                 , MonadRandom
+                 , comonad
+                 , statistics
+                 , matrices
+                 , vector
+                 , primitive
+                 , parallel
+                 , containers
+                 , unordered-containers
+                 , extra
+                 , deepseq
+                 , mtl
+                 , universe-base
+                 , elynx-tree
+                 , bytestring
+                 , hashable
+                 , parallel-io
+                 , random
+                 , primitive-simd
+                 , vector-algorithms
+                 , async
+
+library
+    import:           options
+                    , language
+                    , dependencies
+    hs-source-dirs:   src
+    exposed-modules:  DynamicMutations
+                      DynamicMutations.Immunity
+                      DynamicMutations.Metrics.Diversity
+                      DynamicMutations.Metrics.Entropy.Allen
+                      DynamicMutations.Metrics.Entropy.Jansson
+                      DynamicMutations.Metrics.Linearity
+                      DynamicMutations.ODEs
+                      DynamicMutations.Parameters
+                      DynamicMutations.SIR
+                      DynamicMutations.Types
+                      DynamicMutations.Types.PopulationGraph
+                      DynamicMutations.Types.Tree
+                      DynamicMutations.Variant
+                      Reproduction
+                      Reproduction.ODEs
+                      Reproduction.Parameters
+                      Reproduction.SIR
+                      Reproduction.Types
+                      Reproduction.Variant
+                      Simulation
+                      Simulation.Many
+                      Simulation.Metrics
+                      Simulation.Random
+
+executable hpc
+    import:           options
+                    , language
+                    , dependencies
+    hs-source-dirs:   app
+    main-is:          HPC.hs
+    build-depends:    dynamic-mutations
+                    , filepath
+                    , optparse-applicative
+    ghc-options:      -threaded
+                      -main-is HPC.main
+
+executable repro
+    import:           options
+                    , language
+                    , dependencies
+    hs-source-dirs:   app
+    main-is:          Repro.hs
+    build-depends:    dynamic-mutations
+                    , filepath
+                    , optparse-applicative
+    ghc-options:      -threaded
+                      -main-is Repro.main
+
