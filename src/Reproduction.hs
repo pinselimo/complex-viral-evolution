@@ -16,14 +16,10 @@ import qualified Data.Map.Strict                     as M
 import           Data.Maybe                          (fromJust)
 import           Data.Primitive.SIMD                 (SIMDVector(indexVector, foldVector))
 import           Data.Random                         (StatefulGen)
-import           Data.Tree                           (drawTree)
 import qualified Data.Vector                         as V
 import qualified Data.Vector.Unboxed                 as U
 
-import           Simulation                          (simulateTimedReps,
-                                                      simulateTimedReps1,
-                                                      simulateTimedRepsC,
-                                                      simulateTimedRepsC1, simulateWriteTimedReps1)
+import           Simulation                          (simulateWriteTimedReps1)
 import           DynamicMutations.Immunity           (randomStrain, fastImmunity)
 import           DynamicMutations.Metrics.Diversity  (nucleotideDiversity)
 import qualified DynamicMutations.Metrics.Entropy.Allen   as Allen
@@ -44,10 +40,6 @@ compressTree p = fmap snd . compress fst . extend go
 compress :: (a -> Bool) -> PhyloTree a -> PhyloTree a
 compress p = treeDo go
         where go x ts = (x, V.filter (p . extract) $ treeDo go <$> ts)
-
-showTree :: ImmunityDict -> PhyloTree Variant -> String
-showTree (_,_,d) t@(PT h _) = drawTree . toStrTree (show . (U.length . U.filter id . U.zipWith (/=) (strain h) . strain
-                                                  &&& fastImmunity d (fromJust $ astrain h) . fromJust . astrain)) $ t
 
 modelStep :: forall (g :: Type) (m :: Type -> Type).
              (Monad m, StatefulGen g m) =>
@@ -70,75 +62,19 @@ filtTree = let
          else v { exposed = 0, symptomaticInfected = 0 }
     in V.map go
 
-simulate :: forall (g :: Type) (m :: Type -> Type).
-              (Monad m, StatefulGen g (RL.RandT g m)) =>
-              Int -> Parameters -> g -> m [ModelState]
-simulate = simulateLazy
-
 initState :: Parameters -> Strain -> ModelState
 initState ps s = let
              t = V.fromList [(undefined, V.fromList [baseVariant ps s])]
              (t', mdict) = registerAll ps 0 0 t (M.empty, V.empty, V.empty)
              in (nAgents ps - nInit ps, 0, mdict, t' >>= snd, PT 0 V.empty)
 
-uncurry5 :: (a -> b -> c -> d -> e -> f) -> (a, b, c, d, e) -> f
-uncurry5 f (v,w,x,y,z) = f v w x y z
-
-simStep :: StatefulGen g m => Int -> Parameters -> g -> m [ModelState]
-simStep ticks ps gen = randomStrain ps gen >>= simulateTimedReps ticks (modelStep ps gen) . initState ps
-
-simStep1 :: (MonadTrans t, StatefulGen g (t IO)) => Int -> Parameters -> g -> t IO ModelState
-simStep1 ticks ps gen = randomStrain ps gen >>= simulateTimedReps1 ticks (modelStep ps gen) . initState ps
-
-simStepW1 :: (MonadTrans t, StatefulGen g (t IO)) => Int -> Parameters -> g -> (Int -> ModelState -> IO ()) -> t IO ModelState
-simStepW1 ticks ps gen w = randomStrain ps gen >>= simulateWriteTimedReps1 w ticks (modelStep ps gen) . initState ps
-
 simStepW1Strict :: (MonadTrans t, StatefulGen g (t IO)) => Int -> Parameters -> g -> (Int -> ModelState -> IO ()) -> t IO ModelState
 simStepW1Strict ticks ps gen w = randomStrain ps gen >>= simulateWriteTimedReps1 w ticks (modelStep ps gen) . initState ps
-
-simStepC :: StatefulGen g m => Int -> Int -> Parameters -> g -> (Int -> ModelState -> a) -> m [a]
-simStepC ticks coll ps gen comp = randomStrain ps gen >>= simulateTimedRepsC comp ticks coll (modelStep ps gen) . initState ps
-
-simStepC1 :: StatefulGen g m => Int -> Int -> Parameters -> g -> (Int -> ModelState -> a)
-                             -> m (ModelState, [a])
-simStepC1 ticks coll ps gen comp = randomStrain ps gen >>= simulateTimedRepsC1 comp ticks coll (modelStep ps gen) . initState ps
-
-simulateLazyC :: forall (g :: Type) (m :: Type -> Type) (a :: Type).
-              (Monad m, StatefulGen g (RL.RandT g m)) =>
-              Int -> Int -> (Int -> ModelState -> a) -> Parameters -> g -> m [a]
-simulateLazyC ticks coll comp ps gen = RL.evalRandT (simStepC ticks coll ps gen comp) gen
-
-simulateLazyW1 :: forall (g :: Type). (StatefulGen g (RL.RandT g IO)) =>
-              Int -> (Int -> ModelState -> IO ()) -> Parameters -> g
-              -> IO ModelState
-simulateLazyW1 ticks w ps gen = RL.evalRandT (simStepW1 ticks ps gen w) gen
-
-simulateLazyC1 :: forall (g :: Type) (m :: Type -> Type) (a :: Type).
-              (Monad m, StatefulGen g (RL.RandT g m)) =>
-              Int -> Int -> (Int -> ModelState -> a) -> Parameters -> g
-              -> m (ModelState, [a])
-simulateLazyC1 ticks coll comp ps gen = RL.evalRandT (simStepC1 ticks coll ps gen comp) gen
 
 simulateStrictW1 :: forall (g :: Type). (StatefulGen g (RS.RandT g IO)) =>
               Int -> (Int -> ModelState -> IO ()) -> Parameters -> g
               -> IO ModelState
 simulateStrictW1 ticks w ps gen = RS.evalRandT (simStepW1Strict ticks ps gen w) gen
-
-simulateStrictC1 :: forall (g :: Type) (m :: Type -> Type) (a :: Type).
-              (Monad m, StatefulGen g (RS.RandT g m)) =>
-              Int -> Int -> (Int -> ModelState -> a) -> Parameters -> g
-              -> m (ModelState, [a])
-simulateStrictC1 ticks coll comp ps gen = RS.evalRandT (simStepC1 ticks coll ps gen comp) gen
-
-simulateLazy :: forall (g :: Type) (m :: Type -> Type).
-              (Monad m, StatefulGen g (RL.RandT g m)) =>
-              Int -> Parameters -> g -> m [ModelState]
-simulateLazy ticks ps gen = RL.evalRandT (simStep ticks ps gen) gen
-
-simulateStrict :: forall (g :: Type) (m :: Type -> Type).
-              (Monad m, StatefulGen g (RS.RandT g m)) =>
-              Int -> Parameters -> g -> m [ModelState]
-simulateStrict ticks ps gen = RS.evalRandT (simStep ticks ps gen) gen
 
 toResult :: Parameters -> Int -> ModelState -> Result
 toResult _ps _time (s, sli, _, vt, it) = let
