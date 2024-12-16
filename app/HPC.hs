@@ -27,13 +27,13 @@ import qualified ELynx.Tree                  as ET (Length,
                                                     toLengthUnsafe,
                                                     toNewick)
 
-import           DynamicMutations            (toResult, compressTree, simulateStrictW1)
+import           DynamicMutations            (toResult, simulateStrictW1)
 import           DynamicMutations.Metrics.Linearity (getTotalImpact)
 import           DynamicMutations.Parameters (Parameters (distancingEffect, eqTime, mutability, threshold, cutoffDay, vaccRate),
                                               standardParameters)
 import           DynamicMutations.Types      (Result (..), Variant(recovered, dead, mid))
 import           DynamicMutations.Types.PopulationGraph (unsafeVecSumX20)
-import           DynamicMutations.Types.Tree (PhyloTree, broadcastWith, withTree)
+import           DynamicMutations.Types.Tree (PhyloTree, broadcastWith, withTree, compressTree)
 import           DynamicMutations.Variant    (infected)
 import           Simulation                  (simulateOneIO)
 

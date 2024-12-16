@@ -125,3 +125,11 @@ fromVector f v = fmap ((v V.!) . f)
 buildTree :: IntMap (V.Vector Int) -> PhyloTree Int -> PhyloTree Int
 buildTree m = treeDo (\i ts -> (i, (buildTree m <$> ts) <> (new PT <$> findWithDefault V.empty i m)))
 
+compressTree :: (PhyloTree a -> Bool) -> PhyloTree a -> PhyloTree a
+compressTree p = fmap snd . compress fst . extend go
+        where go t = (p t, extract t)
+
+compress :: (a -> Bool) -> PhyloTree a -> PhyloTree a
+compress p = treeDo go
+        where go x ts = (x, V.filter (p . extract) $ treeDo go <$> ts)
+

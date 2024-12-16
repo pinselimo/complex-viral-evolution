@@ -32,14 +32,6 @@ import           DynamicMutations.Types.Tree             (PhyloTree (..),
                                                           toStrTree, treeDo, buildTree)
 import           DynamicMutations.Variant                (Variant (..), baseVariant, evolveTree, infected, registerAll)
 
-compressTree :: (PhyloTree a -> Bool) -> PhyloTree a -> PhyloTree a
-compressTree p = fmap snd . compress fst . extend go
-        where go t = (p t, extract t)
-
-compress :: (a -> Bool) -> PhyloTree a -> PhyloTree a
-compress p = treeDo go
-        where go x ts = (x, V.filter (p . extract) $ treeDo go <$> ts)
-
 modelStep :: forall (g :: Type) (m :: Type -> Type).
              (Monad m, StatefulGen g m) =>
              Parameters -> g -> Int -> ModelState -> m ModelState
