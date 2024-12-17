@@ -5,7 +5,6 @@
 module DynamicMutations where
 
 import           Control.Arrow                       (Arrow (second))
-import           Control.Comonad                     (extend, extract)
 import           Control.Monad.Trans                 (MonadTrans)
 import qualified Control.Monad.Trans.Random.Strict   as RS (RandT, evalRandT)
 import           Control.Parallel.Strategies         (using, rpar)
@@ -28,8 +27,7 @@ import           DynamicMutations.Parameters             (Parameters (eqTime, nA
 import           DynamicMutations.SIR                    (sirStep)
 import           DynamicMutations.Types                  (ModelState, Result (..), Strain, initDeaths)
 import           DynamicMutations.Types.PopulationGraph  (vecSum, vecMap, unsafeVecSumX20, GraphX20 (unVecX20), Vec (Vec), (&*))
-import           DynamicMutations.Types.Tree             (PhyloTree (..),
-                                                          toStrTree, treeDo, buildTree)
+import           DynamicMutations.Types.Tree             (PhyloTree (..), buildTree)
 import           DynamicMutations.Variant                (Variant (..), baseVariant, evolveTree, infected, registerAll)
 
 modelStep :: forall (g :: Type) (m :: Type -> Type).

@@ -4,10 +4,8 @@
 {-# LANGUAGE BangPatterns          #-}
 module Reproduction where
 
-import           Control.Arrow                       ((&&&), Arrow (second))
-import           Control.Comonad                     (extend, extract)
+import           Control.Arrow                       (Arrow (second))
 import           Control.Monad.Trans                 (MonadTrans)
-import qualified Control.Monad.Trans.Random.Lazy     as RL (RandT, evalRandT)
 import qualified Control.Monad.Trans.Random.Strict   as RS (RandT, evalRandT)
 import           Control.Parallel.Strategies         (using, rpar)
 import           Data.IntMap                         (fromAscList)
@@ -17,17 +15,16 @@ import           Data.Maybe                          (fromJust)
 import           Data.Primitive.SIMD                 (SIMDVector(indexVector, foldVector))
 import           Data.Random                         (StatefulGen)
 import qualified Data.Vector                         as V
-import qualified Data.Vector.Unboxed                 as U
 
 import           Simulation                          (simulateWriteTimedReps1)
-import           DynamicMutations.Immunity           (randomStrain, fastImmunity)
+import           DynamicMutations.Immunity           (randomStrain)
 import           DynamicMutations.Metrics.Diversity  (nucleotideDiversity)
 import qualified DynamicMutations.Metrics.Entropy.Allen   as Allen
 import qualified DynamicMutations.Metrics.Entropy.Jansson as Jansson
 import           DynamicMutations.Metrics.Linearity  (sizeCorrectedTreeImpactConcentration)
-import           DynamicMutations.Types              (ImmunityDict, Strain, Result(..))
+import           DynamicMutations.Types              (Strain, Result(..))
 import           DynamicMutations.Types.PopulationGraph  (unsafeVecSumX20, GraphX20 (unVecX20), (&*))
-import           DynamicMutations.Types.Tree         (PhyloTree (..), toStrTree, treeDo, buildTree)
+import           DynamicMutations.Types.Tree         (PhyloTree (..), buildTree)
 import           Reproduction.Parameters             (Parameters (eqTime, nAgents, nInit))
 import           Reproduction.SIR                    (sirStep)
 import           Reproduction.Types                  (ModelState)
