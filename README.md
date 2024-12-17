@@ -16,6 +16,24 @@ You can change model parameter settings in ``app/HPC.hs`` or ``app/Repro.hs`` re
 
 To optimize performance try adding the following ``RTS`` parameters to the end of the commands: ``-A64m -n2m -qn4``. The ``qn`` value should be no larger than the number of physical cores.
 
+## Without nix
+
+If you don't want to use the ``nix`` build tool you need to install ``llvm``, ``ghc`` and ``cabal`` and refer cabal to a local clone of the ``doublex20`` branch of the following package: (https://github.com/pinselimo/primitive-simd)[https://github.com/pinselimo/primitive-simd]. You can do so by cloning the repository switching to said branch and adding its path to the ``cabal.project.local`` file as: ``packages: /path/to/directory/primitive-simd``.
+
+You can then build and execute the model by running:
+
+~~~
+cabal run hpc -fvec256 -- -p ./data -s "Just $SEED" +RTS -N"$CORES"
+~~~
+
+or for the reproduction model:
+
+~~~
+cabal run repro -fvec256 -- -p ./data -s "Just $SEED" +RTS -N"$CORES"
+~~~
+
+The model was tested on different x86 architecture CPUs, it does not build on Apple Silicon.
+
 ## Generated Data
 
 The generated ``csv`` Files contain keys that relate to the stored values as listed below:
