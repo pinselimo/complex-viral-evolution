@@ -25,16 +25,16 @@ If you don't want to use the ``nix`` build tool you need to install ``llvm``, ``
 You can then build and execute the model by running:
 
 ~~~
-cabal run hpc -fvec256 -- -p ./data -s "Just $SEED" +RTS -N"$CORES"
+$ cabal run hpc -fvec256 -- -p ./data -s "Just $SEED" +RTS -N"$CORES"
 ~~~
 
-or for the reproduction model:
+Or for the reproduction model:
 
 ~~~
-cabal run repro -fvec256 -- -p ./data -s "Just $SEED" +RTS -N"$CORES"
+$ cabal run repro -fvec256 -- -p ./data -s "Just $SEED" +RTS -N"$CORES"
 ~~~
 
-The model was tested on different x86 architecture CPUs, it does not build on Apple Silicon.
+The model was tested on different x86-64 architecture CPUs on NixOS 24.11 and Ubuntu 22.04.5 LTS, it does not build on Apple Silicon. Simulation times will vary but a single run should usually not exceed an hour of runtime using 4 cores of an i7 CPU. Installation times should be within a couple of minutes.
 
 ## Generated Data
 
