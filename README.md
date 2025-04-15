@@ -1,6 +1,8 @@
 # SIRMutations - Dynamic mutations in a SEPIARD model
 
-This model is built using ``nix`` ``flakes``. To build and run the simulations showing the non-linearity of evolution with a given ``SEED`` on ``CORES`` cores and store the result in the ``data`` directory execute:
+This repository contains the source code for the manuscript _Complex viral evolution as an unintended consequence of social distancing_ that is [currently available as a pre-print](https://doi.org/10.21203/rs.3.rs-5963256/v1).
+
+This model is built using ``nix`` version ``2.24.10`` with ``nix flakes``. To build and run the simulations showing the non-linearity of evolution with a given ``SEED`` on ``CORES`` cores and store the result in the ``data`` directory execute:
 
 ~~~
 $ nix run '.#hpc' -- -p ./data -s "Just $SEED" +RTS -N"$CORES"
