@@ -77,3 +77,11 @@ Jansson, Jesper, Kunihiko Sadakane, and Wing-Kin Sung. 2012. “Ultra-Succinct R
 
 Allen, Benjamin, Mark Kon, and Yaneer Bar‐Yam. 2009. “A New Phylogenetic Diversity Measure Generalizing the Shannon Index and Its Application to Phyllostomid Bats.” The American Naturalist 174 (2): 236–43. https://doi.org/10.1086/600101.
 
+## Acknowledgements
+
+We want to thank the University of Graz for providing a local compute cluster and access to the Vienna Scientific Cluster (VSC). The computational results presented have been achieved [in part] using the Vienna Scientific Cluster (VSC).
+
+## Funding
+
+This research was funded in whole, or in part, by the Austrian Science Fund (FWF) [P 35228].
+
